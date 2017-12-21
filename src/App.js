@@ -1,9 +1,10 @@
 import React from 'react'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
-import CurrentlyReadingShelf from './CurrentlyReadingShelf'
-import WantToReadShelf from './WantToReadShelf'
-import ReadShelf from './ReadShelf'
+//import CurrentlyReadingShelf from './CurrentlyReadingShelf'
+//import WantToReadShelf from './WantToReadShelf'
+//import ReadShelf from './ReadShelf'
+import BookSearch from './BookSearch'
 
 
 //Shelfs container
@@ -22,7 +23,6 @@ class BooksApp extends React.Component {
   componentDidMount(){
     BooksAPI.getAll().then((books)=>{
       this.setState({books : books})
-      console.log(books);
     })
   }
 
@@ -42,22 +42,9 @@ class BooksApp extends React.Component {
   render() {
     return (
       <div className="app"> 
-        <div className="list-books"> 
-            <div className="list-books-title">
-                <h1>MyReads</h1>
-            </div>
-            <div className="list-books-content">
-                <CurrentlyReadingShelf 
-                    books={this.state.books.filter((book)=> book.shelf === 'currentlyReading')}
-                    onChangeShelf={this.changeShelf}/>
-                <WantToReadShelf 
-                    books={this.state.books.filter((book)=> book.shelf === 'wantToRead')}
-                    onChangeShelf={this.changeShelf} />
-                <ReadShelf 
-                    books={this.state.books.filter((book)=> book.shelf === 'read')}
-                    onChangeShelf={this.changeShelf}/>
-            </div>
-        </div>
+        <BookSearch 
+          />
+        
       </div>
     )
   }
@@ -65,4 +52,24 @@ class BooksApp extends React.Component {
 
 export default BooksApp
 
+/* 
 
+<div className="list-books"> 
+    <div className="list-books-title">
+        <h1>MyReads</h1>
+    </div>
+    <div className="list-books-content">
+        <CurrentlyReadingShelf 
+          books={this.state.books.filter((book)=> book.shelf === 'currentlyReading')}
+          onChangeShelf={this.changeShelf}/>
+        <WantToReadShelf 
+          books={this.state.books.filter((book)=> book.shelf === 'wantToRead')}
+          onChangeShelf={this.changeShelf} />
+        <ReadShelf 
+          books={this.state.books.filter((book)=> book.shelf === 'read')}
+          onChangeShelf={this.changeShelf}/>   
+    </div>
+</div>
+
+
+*/
