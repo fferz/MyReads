@@ -37,13 +37,18 @@ class BooksApp extends React.Component {
       return book.id === bookId});
     bookObject.shelf = newShelf;
     this.setState(bookObject);
+    this.updateServer(bookObject, newShelf)
   };
+
+  updateServer = (book, shelf) => {
+    BooksAPI.update(book, shelf)
+  }
 
   render() {
     return (
       <div className="app"> 
         <BookSearch 
-          />
+          selectedBooks={this.state.books}/>
         
       </div>
     )
