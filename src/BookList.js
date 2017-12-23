@@ -3,6 +3,13 @@ import Book from './Book'
 
 
 class BookList extends Component{
+
+    handleBookShelfChange = (bookId, newShelf) => {
+        let bookChanged = this.props.books.find((book) => book.id === bookId)
+        this.props.onUpdateBookShelf(bookChanged, newShelf);
+        console.log('BookList - shelf', newShelf, 'book', bookChanged, 'bookId', bookId);
+    }
+
     render(){
         return(
             <div className="bookshelf-books">
@@ -14,7 +21,8 @@ class BookList extends Component{
                                     title={book.title}
                                     authors={book.authors}
                                     image={book.imageLinks.thumbnail}
-                                    defaultValue='none'/>
+                                    shelf={book.shelf}
+                                    shelfChange={this.handleBookShelfChange}/>
                                 )}
                     </ol>
             </div>

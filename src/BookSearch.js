@@ -3,12 +3,15 @@ import BookList from './BookList'
 import * as BooksAPI from './BooksAPI'
 import {DebounceInput} from 'react-debounce-input'
 
+
 class BookSearch extends Component{
     state = {
         query: '',
         booksResult : [],
+        booksFiled : [],
         error: false,
-        errorLog: ''
+        errorLog: '',
+
     }
 
     getInitialState = () => {
@@ -17,66 +20,31 @@ class BookSearch extends Component{
 
     updateQuery = (query) => {
         this.setState({ query: query.trim() })
-        this.getResults(this.state.query)
         this.setState({booksResult : []})
+        this.getResults(this.state.query)
     }
 
     updateBookResult = (result) => {
-        //console.log('bookResult sin borrar', this.state.booksResult)
-        //this.setState({booksResult : []})
-        //console.log('bookResult borrado', this.state.booksResult)
-        this.setState({booksResult : result})
+        console.log('updateBookResult')
+        let resultWithShelf = result.map((book) => {
+            if (book.shelf === undefined){ book.shelf='none' }
+            return book})
+        this.setState({booksResult : resultWithShelf})
         console.log('bookResult nuevo', this.state.booksResult)
-        console.log('error log', this.state.errorLog)
     }
-    /*
-    compareBooksLists = (result) => {
-        let booksOnShelves = this.props.selectedBooks;
-        let bookOnResult;
-        let booksMatchResult = []
-        let booksMatchShelf = []
-        booksOnShelves.forEach((book) => {
-            bookOnResult = result.find((item) => (this.findISBN13(item) === this.findISBN13(book)))
-            if (bookOnResult) {
-                //matching books
-                booksMatchResult = bookOnResult.concat(booksMatchResult); //books in result list
-                booksMatchShelf = book.concat(booksMatchShelf) //books already in shelves that match the search
-                console.log('booksMatchResult', booksMatchResult)
-                console.log('booksMatchShelf', booksMatchShelf)
-            }})
-        if (bookOnResult.length) { 
-            console.log('bookOnResult.length', bookOnResult.length)
-            this.mergeBooksLists(booksMatchResult, booksMatchShelf, result) 
-        } else { 
-            this.updateBookResult(result) 
-        }
+    
+    updateBookShelf = (book, newShelf) => {
+        if (book && newShelf){
+            BooksAPI.update(book, newShelf).then(bookResult => {
+                this.setState({newShelf})
+            })
+        } 
     }
 
-    mergeBooksLists = (booksMatchResult, booksMatchShelf, result) => {
-        //delete books in result
-        booksMatchResult.forEach((item)=> {
-            let arr1
-            arr1 = result.filter((b) => b.id !== item.id )
-            result = arr1
-        })
-        console.log('result', result)
-        //add books in shelves
-        result = booksMatchShelf.concat(result);
-        this.updateBookResult(result); 
-        console.log('result with books on shelves', result)
-
-    }
-
-    findISBN13 = (book) => {
-        let obj;
-        obj = book.industryIdentifiers.find((indId) => indId.type === 'ISBN_13' )
-        return obj.identifier;
-    }
-    */
-
-    updateErrorTrue = (e) => {
+    updateErrorTrue = () => {
         this.setState({error : true})
-        this.setState({errorLog : e})
+        //this.setState({errorLog : e})
+        //ver, no se si hacer con catch o no, capaz no hace falta, entonces no guardo errorLog..
     }
 
     updateErrorFalse = () => {
@@ -85,18 +53,91 @@ class BookSearch extends Component{
         this.setState({ errorLog : ''})
     }
 
+
     getResults = (value) => {
         console.log('buscando', value)
+
         if (value){
-            BooksAPI.search(value, 20).then((result)=>{
-            this.updateBookResult(result)
-            this.updateErrorFalse()
-        }).catch(e => this.updateErrorTrue(e))
-        }
-        
-        
-        
+            Promise.all([BooksAPI.getAll(), BooksAPI.search(value, 20)]).then((result)=>{
+                this.getFinalResult(result)
+                this.updateErrorFalse()
+            }).catch((e) => this.updateErrorTrue(e))
+        } 
     }
+
+    //return all coincidences
+    getFinalResult = (result) => {
+        let arr1 = result[0]
+        let arr2 = result[1]
+        let resultShelf = []
+        let resultNoShelf = []
+
+        //search results don't have shelf
+        let arrShelf = arr1.find(( item ) => item.shelf === undefined)
+        if (arrShelf !== undefined) {resultNoShelf = arr1, resultShelf = arr2}
+        else {resultNoShelf = arr2, resultShelf = arr1}
+        console.log('search results', resultNoShelf)
+
+        //duplicates with shelf = books from getAll that match the query
+        let resultShelfDuplicate = []
+        resultShelf.forEach((book) => {let duplicate = resultNoShelf.find((item)=> (this.findISBN13(item) === this.findISBN13(book)))
+                                        if (duplicate){resultShelfDuplicate.push(book)}})
+        console.log('duplicate books with shelf', resultShelfDuplicate)
+        
+        //search result without duplicates
+        let arr = resultNoShelf
+        console.log('arr', arr)
+        let x = 1;
+        /*
+        for (var i = 0; i <= resultNoShelf.length; i++){
+            for (var j = 0; j <= resultShelfDuplicate.length; j++){
+                if (this.findISBN13(resultNoShelf[i]) === this.findISBN13(resultShelfDuplicate[j])){
+                    arr = arr.filter((item) => this.findISBN13(item) !== this.findISBN13(resultShelfDuplicate[j]))
+                    console.log('arr en if', arr)
+                    console.log('iteraciones', x++)
+                }
+            }
+        }*/
+
+        resultNoShelf.forEach((book) => {
+            resultShelfDuplicate.forEach((item) => {
+                if (this.findISBN13(book) === this.findISBN13(item)){
+                    arr = arr.filter((b) => this.findISBN13(b) !== this.findISBN13(item))
+                    console.log('arr en if', arr)
+                    console.log('iteraciones', x++)
+                }
+            })
+        })
+
+        let finalResult = resultShelfDuplicate.concat(arr)
+
+        console.log('final result', finalResult)
+
+        this.updateBookResult(finalResult)
+    }
+    /*
+    //return new books
+    getNewResults = (result) =>{
+        let resultNoShelf = result.filter((item) => item.shelf === 'none')
+        return resultNoShelf
+    }
+
+    getShowResults = (coincidencesWithShelf, resultNoShelf) => {
+        let finalResult = coincidencesWithShelf.concat(resultNoShelf)
+        return finalResult
+    }
+*/
+
+    findISBN13 = (book) => {
+        let obj;
+        obj = book.industryIdentifiers.find((indId) => indId.type === 'ISBN_13' )
+        return obj.identifier;
+    }
+
+
+    
+
+    
     
     render(){
         let showResults = null;
@@ -105,7 +146,7 @@ class BookSearch extends Component{
         else if (this.state.error){
             showResults = <p>we could not find the book you are looking for :(</p>
         } else {
-            showResults = <BookList books={this.state.booksResult}/>
+            showResults = <BookList books={this.state.booksResult} onUpdateBookShelf={this.updateBookShelf}/>
         }
         return(
             
