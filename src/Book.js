@@ -1,6 +1,17 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 class Book extends Component{
+
+    static propTypes = {
+        id: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        authors: PropTypes.array.isRequired,
+        image: PropTypes.string.isRequired,
+        shelf: PropTypes.string.isRequired,
+        shelfChange: PropTypes.func.isRequired
+    }
+    
     render(){
         return(
             <li key={this.props.id}>
@@ -29,7 +40,3 @@ class Book extends Component{
 }
    
 export default Book
-
-/*
-onChange={(event)=>this.handleSelectOnChange(event.target.value, book)}
-*/

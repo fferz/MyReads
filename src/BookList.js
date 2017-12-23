@@ -1,13 +1,16 @@
 import React, { Component } from 'react'
 import Book from './Book'
-
+import PropTypes from 'prop-types';
 
 class BookList extends Component{
+    static propTypes = {
+        books: PropTypes.array.isRequired,
+        onUpdateBookShelf: PropTypes.func.isRequired
+    }
 
     handleBookShelfChange = (bookId, newShelf) => {
         let bookChanged = this.props.books.find((book) => book.id === bookId)
         this.props.onUpdateBookShelf(bookChanged, newShelf);
-        console.log('BookList - shelf', newShelf, 'book', bookChanged, 'bookId', bookId);
     }
 
     render(){

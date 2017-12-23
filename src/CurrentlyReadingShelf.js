@@ -1,9 +1,13 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 
 class CurrentlyReadingShelf extends Component{    
+    static propTypes = {
+        books: PropTypes.array.isRequired,
+        onChangeShelf: PropTypes.func.isRequired
+    }
     handleSelectOnChange = (value, book) => {
         this.props.onChangeShelf(value, book.id);
-        console.log('shelf', value);
     }
     render(){
         return(

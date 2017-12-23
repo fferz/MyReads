@@ -1,7 +1,11 @@
 import React, { Component } from 'react'
-
+import PropTypes from 'prop-types';
 
 class WantToReadShelf extends Component{
+    static propTypes = {
+        books: PropTypes.array.isRequired,
+        onChangeShelf: PropTypes.func.isRequired
+    }
     handleSelectOnChange = (value, book) => {
         this.props.onChangeShelf(value, book.id);
     }
@@ -13,7 +17,7 @@ class WantToReadShelf extends Component{
                     <h2 className="bookshlef-title">Want to Read</h2>
                     <div className="bookshelf-books">
                         <ol className="books-grid">
-                            {this.props.books.map((book, index)=>
+                            {this.props.books.map((book)=>
                                 <li key={book.id}>
                                     <div className="book">
                                         <div className="book-top">

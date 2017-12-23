@@ -3,18 +3,21 @@ import { Link } from 'react-router-dom'
 import BookList from './BookList'
 import * as BooksAPI from './BooksAPI'
 import {DebounceInput} from 'react-debounce-input'
-
+import PropTypes from 'prop-types';
 
 class BookSearch extends Component{
     state = {
         query: '',
         booksResult : [],
-        booksFiled : [],
         error: false,
         errorLog: '',
-
     }
 
+    static propTypes = {
+        selectedBooks: PropTypes.array.isRequired
+    }
+
+    //is this necesary?
     getInitialState = () => {
         return this.state.booksResult;
     }
@@ -26,12 +29,10 @@ class BookSearch extends Component{
     }
 
     updateBookResult = (result) => {
-        console.log('updateBookResult')
         let resultWithShelf = result.map((book) => {
             if (book.shelf === undefined){ book.shelf='none' }
             return book})
         this.setState({booksResult : resultWithShelf})
-        console.log('bookResult nuevo', this.state.booksResult)
     }
     
     updateBookShelf = (book, newShelf) => {
@@ -44,28 +45,25 @@ class BookSearch extends Component{
 
     updateErrorTrue = () => {
         this.setState({error : true})
-        //this.setState({errorLog : e})
-        //ver, no se si hacer con catch o no, capaz no hace falta, entonces no guardo errorLog..
     }
 
     updateErrorFalse = () => {
         this.setState({error : false})
-        console.log('error', this.state.error)
         this.setState({ errorLog : ''})
     }
 
-
+    //is it ok to call the api in 2 places?
     getResults = (value) => {
-        console.log('buscando', value)
-
         if (value){
             Promise.all([BooksAPI.getAll(), BooksAPI.search(value, 20)]).then((result)=>{
-                this.getFinalResult(result)
+                let finalResult = this.getFinalResult(result)
+                this.updateBookResult(finalResult)
                 this.updateErrorFalse()
             }).catch((e) => this.updateErrorTrue(e))
         } 
     }
 
+    //this should be composed by little functions instead, I guess
     getFinalResult = (result) => {
         let arr1 = result[0]
         let arr2 = result[1]
@@ -74,15 +72,18 @@ class BookSearch extends Component{
 
         //search results don't have shelf
         let arrShelf = arr1.find(( item ) => item.shelf === undefined)
-        if (arrShelf !== undefined) {resultNoShelf = arr1, resultShelf = arr2}
-        else {resultNoShelf = arr2, resultShelf = arr1}
-        console.log('search results', resultNoShelf)
+        if (arrShelf !== undefined) {
+            resultNoShelf = arr1 
+            resultShelf = arr2
+        } else {
+            resultNoShelf = arr2
+            resultShelf = arr1 
+        }
 
         //duplicates with shelf = books from getAll that match the query
         let resultShelfDuplicate = []
         resultShelf.forEach((book) => {let duplicate = resultNoShelf.find((item)=> (this.findISBN13(item) === this.findISBN13(book)))
                                         if (duplicate){resultShelfDuplicate.push(book)}})
-        console.log('duplicate books with shelf', resultShelfDuplicate)
         
         //search result without duplicates
         let arr = resultNoShelf
@@ -95,10 +96,7 @@ class BookSearch extends Component{
         })
 
         let finalResult = resultShelfDuplicate.concat(arr)
-
-        console.log('final result', finalResult)
-
-        this.updateBookResult(finalResult)
+        return finalResult
     }
 
     findISBN13 = (book) => {
@@ -107,11 +105,6 @@ class BookSearch extends Component{
         return obj.identifier;
     }
 
-
-    
-
-    
-    
     render(){
         let showResults = null;
         if (this.state.query === ''){
@@ -129,14 +122,6 @@ class BookSearch extends Component{
                     <Link className="close-search" to="/">Close</Link>
                 </div>
                 <div className="search-books-input-wrapper">
-                    {/*
-                    NOTES: The search from BooksAPI is limited to a particular set of search terms.
-                    You can find these search terms here:
-                    https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-                    However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-                    you don't find a specific author or title. Every search is limited by search terms.
-                    */}
                     <DebounceInput 
                         type="text" 
                         placeholder="Search by title or author"
