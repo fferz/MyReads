@@ -48,6 +48,7 @@ class BooksApp extends React.Component {
                       <h1>MyReads</h1>
                   </div>
                   <div className="list-books-content">
+                      {/*there should be just one component shelf, I'm working on it */}
                       <CurrentlyReadingShelf 
                         books={this.state.books.filter((book)=> book.shelf === 'currentlyReading')}
                         onChangeShelf={this.changeShelf}/>
