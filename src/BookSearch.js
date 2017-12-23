@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import BookList from './BookList'
 import * as BooksAPI from './BooksAPI'
 import {DebounceInput} from 'react-debounce-input'
@@ -65,7 +66,6 @@ class BookSearch extends Component{
         } 
     }
 
-    //return all coincidences
     getFinalResult = (result) => {
         let arr1 = result[0]
         let arr2 = result[1]
@@ -86,25 +86,10 @@ class BookSearch extends Component{
         
         //search result without duplicates
         let arr = resultNoShelf
-        console.log('arr', arr)
-        let x = 1;
-        /*
-        for (var i = 0; i <= resultNoShelf.length; i++){
-            for (var j = 0; j <= resultShelfDuplicate.length; j++){
-                if (this.findISBN13(resultNoShelf[i]) === this.findISBN13(resultShelfDuplicate[j])){
-                    arr = arr.filter((item) => this.findISBN13(item) !== this.findISBN13(resultShelfDuplicate[j]))
-                    console.log('arr en if', arr)
-                    console.log('iteraciones', x++)
-                }
-            }
-        }*/
-
         resultNoShelf.forEach((book) => {
             resultShelfDuplicate.forEach((item) => {
                 if (this.findISBN13(book) === this.findISBN13(item)){
                     arr = arr.filter((b) => this.findISBN13(b) !== this.findISBN13(item))
-                    console.log('arr en if', arr)
-                    console.log('iteraciones', x++)
                 }
             })
         })
@@ -115,18 +100,6 @@ class BookSearch extends Component{
 
         this.updateBookResult(finalResult)
     }
-    /*
-    //return new books
-    getNewResults = (result) =>{
-        let resultNoShelf = result.filter((item) => item.shelf === 'none')
-        return resultNoShelf
-    }
-
-    getShowResults = (coincidencesWithShelf, resultNoShelf) => {
-        let finalResult = coincidencesWithShelf.concat(resultNoShelf)
-        return finalResult
-    }
-*/
 
     findISBN13 = (book) => {
         let obj;
@@ -152,23 +125,25 @@ class BookSearch extends Component{
             
             <div className="search-books">  
                 <div className="search-books-bar">
-                <a className="close-search" onClick={() => this.setState({ showSearchPage: false })}>Close</a>
-                    <div className="search-books-input-wrapper">
-                        {/*
-                        NOTES: The search from BooksAPI is limited to a particular set of search terms.
-                        You can find these search terms here:
-                        https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
+                <div>
+                    <Link className="close-search" to="/">Close</Link>
+                </div>
+                <div className="search-books-input-wrapper">
+                    {/*
+                    NOTES: The search from BooksAPI is limited to a particular set of search terms.
+                    You can find these search terms here:
+                    https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
 
-                        However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-                        you don't find a specific author or title. Every search is limited by search terms.
-                        */}
-                        <DebounceInput 
-                            type="text" 
-                            placeholder="Search by title or author"
-                            value={this.state.query}
-                            debounceTimeout={300}
-                            onChange={(event)=> this.updateQuery(event.target.value)}/>
-                    </div>
+                    However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
+                    you don't find a specific author or title. Every search is limited by search terms.
+                    */}
+                    <DebounceInput 
+                        type="text" 
+                        placeholder="Search by title or author"
+                        value={this.state.query}
+                        debounceTimeout={300}
+                        onChange={(event)=> this.updateQuery(event.target.value)}/>
+                </div>
                 </div>
                 <div className="search-books-results">
                     <ol className="books-grid">
