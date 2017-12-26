@@ -1,37 +1,35 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Book from './Book'
 import PropTypes from 'prop-types';
 
-class BookList extends Component{
-    static propTypes = {
-        books: PropTypes.array.isRequired,
-        onUpdateBookShelf: PropTypes.func.isRequired
+const BookList = (props) => {
+
+    const handleBookShelfChange = (bookId, newShelf) => {
+        let bookChanged = props.books.find((book) => book.id === bookId)
+        props.onUpdateBookShelf(bookChanged, newShelf);
     }
 
-    handleBookShelfChange = (bookId, newShelf) => {
-        let bookChanged = this.props.books.find((book) => book.id === bookId)
-        this.props.onUpdateBookShelf(bookChanged, newShelf);
-    }
+    return (
+        <div className="bookshelf-books">
+                <ol className="books-grid">
+                    {props.books.map((book)=>
+                            <Book 
+                                key={book.id}
+                                id={book.id}
+                                title={book.title}
+                                authors={book.authors}
+                                image={book.imageLinks.thumbnail}
+                                shelf={book.shelf}
+                                shelfChange={handleBookShelfChange}/>
+                            )}
+                </ol>
+        </div>
+    )
+}
 
-    render(){
-        return(
-            <div className="bookshelf-books">
-                    <ol className="books-grid">
-                        {this.props.books.map((book)=>
-                                <Book 
-                                    key={book.id}
-                                    id={book.id}
-                                    title={book.title}
-                                    authors={book.authors}
-                                    image={book.imageLinks.thumbnail}
-                                    shelf={book.shelf}
-                                    shelfChange={this.handleBookShelfChange}/>
-                                )}
-                    </ol>
-            </div>
-        )
-    }
-
+BookList.propTypes = {
+    books: PropTypes.array.isRequired,
+    onUpdateBookShelf: PropTypes.func.isRequired
 }
 
 export default BookList
