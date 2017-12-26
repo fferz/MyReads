@@ -3,11 +3,8 @@ import { Link } from 'react-router-dom'
 import { Route} from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
-import CurrentlyReadingShelf from './CurrentlyReadingShelf'
-import WantToReadShelf from './WantToReadShelf'
-import ReadShelf from './ReadShelf'
 import BookSearch from './BookSearch'
-
+import Shelf from './Shelf'
 
 //Shelfs container
 class BooksApp extends React.Component {
@@ -25,15 +22,23 @@ class BooksApp extends React.Component {
     return book.id === id;
   }
 
-  changeShelf = (newShelf, bookId) => {
+//with this code, I need to refresh the page to see the changes :/
+ /*changeBookShelf = (book, newShelf) => {
+        if (book && newShelf){
+            BooksAPI.update(book, newShelf).then(bookResult => {
+                this.setState({newShelf})
+            })
+        } 
+    }
+*/
+
+changeBookShelf = (book, newShelf) => {
     //here we don't mutate state
-    let bookArray = this.state.books.slice();
-    let bookObject = bookArray.find((book)=>{
-      return book.id === bookId});
-    bookObject.shelf = newShelf;
-    this.setState(bookObject);
-    this.updateServer(bookObject, newShelf)
-  };
+    let bookUpdated = book
+    bookUpdated.shelf = newShelf
+    this.setState(bookUpdated);
+    this.updateServer(book, newShelf)
+  }; 
 
   updateServer = (book, shelf) => {
     BooksAPI.update(book, shelf)
@@ -48,16 +53,15 @@ class BooksApp extends React.Component {
                       <h1>MyReads</h1>
                   </div>
                   <div className="list-books-content">
-                      {/*there should be just one component shelf, I'm working on it */}
-                      <CurrentlyReadingShelf 
-                        books={this.state.books.filter((book)=> book.shelf === 'currentlyReading')}
-                        onChangeShelf={this.changeShelf}/>
-                      <WantToReadShelf 
-                        books={this.state.books.filter((book)=> book.shelf === 'wantToRead')}
-                        onChangeShelf={this.changeShelf} />
-                      <ReadShelf 
-                        books={this.state.books.filter((book)=> book.shelf === 'read')}
-                        onChangeShelf={this.changeShelf}/>   
+                      <Shelf shelfTitle='Currently Reading'
+                             books={this.state.books.filter((book)=> book.shelf === 'currentlyReading')}
+                             onChangeShelf={this.changeBookShelf} />
+                      <Shelf shelfTitle='Want to read'
+                             books={this.state.books.filter((book)=> book.shelf === 'wantToRead')}
+                             onChangeShelf={this.changeBookShelf} />
+                      <Shelf shelfTitle='Read'
+                             books={this.state.books.filter((book)=> book.shelf === 'read')}
+                             onChangeShelf={this.changeBookShelf} />
                   </div>
                   <div className="open-search">
                       <Link 
@@ -77,5 +81,3 @@ class BooksApp extends React.Component {
 }
 
 export default BooksApp
-
-
