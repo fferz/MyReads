@@ -14,7 +14,8 @@ class BookSearch extends Component{
     }
 
     static propTypes = {
-        selectedBooks: PropTypes.array.isRequired
+        selectedBooks: PropTypes.array.isRequired,
+        onChangeShelf: PropTypes.func.isRequired
     }
 
     //is this necesary?
@@ -37,11 +38,7 @@ class BookSearch extends Component{
     
     
     updateBookShelf = (book, newShelf) => {
-        if (book && newShelf){
-            BooksAPI.update(book, newShelf).then(bookResult => {
-                this.setState({newShelf})
-            })
-        } 
+        this.props.onChangeShelf(book, newShelf)
     }
 
     updateErrorTrue = () => {
@@ -53,52 +50,51 @@ class BookSearch extends Component{
         this.setState({ errorLog : ''})
     }
 
-    //is it ok to call the api in 2 places?
     getResults = (value) => {
-        if (value){
+        /*if (value){
             Promise.all([BooksAPI.getAll(), BooksAPI.search(value, 20)]).then((result)=>{
                 let finalResult = this.getFinalResult(result)
                 this.updateBookResult(finalResult)
                 this.updateErrorFalse()
             }).catch((e) => this.updateErrorTrue(e))
-        } 
+        } */
+        if (value){
+            BooksAPI.search(value,20).then((result) => {
+                let finalResult = this.getFinalResult(result)
+                this.updateBookResult(finalResult)
+                this.updateErrorFalse()
+            }).catch((e) => this.updateErrorTrue(e))
+            
+        }
     }
 
     //this should be composed by little functions instead, I guess
     getFinalResult = (result) => {
-        let arr1 = result[0]
-        let arr2 = result[1]
-        let resultShelf = []
-        let resultNoShelf = []
-
-        //search results don't have shelf
-        let arrShelf = arr1.find(( item ) => item.shelf === undefined)
-        if (arrShelf !== undefined) {
-            resultNoShelf = arr1 
-            resultShelf = arr2
-        } else {
-            resultNoShelf = arr2
-            resultShelf = arr1 
-        }
+        let searchResult = result //resultNoShelf
+        let getAllResult = this.props.selectedBooks //resultShelf
 
         //duplicates with shelf = books from getAll that match the query
-        let resultShelfDuplicate = []
-        resultShelf.forEach((book) => {let duplicate = resultNoShelf.find((item)=> (this.findISBN13(item) === this.findISBN13(book)))
-                                        if (duplicate){resultShelfDuplicate.push(book)}})
+        let getAllResultDuplicates = []
+        getAllResult.forEach((book) => {let duplicate = searchResult.find((item)=> (this.findISBN13(item) === this.findISBN13(book)))
+                                        if (duplicate){getAllResultDuplicates.push(book)}})
         
         //search result without duplicates
-        let arr = resultNoShelf
-        resultNoShelf.forEach((book) => {
-            resultShelfDuplicate.forEach((item) => {
+        let arr = searchResult
+        searchResult.forEach((book) => {
+            getAllResultDuplicates.forEach((item) => {
                 if (this.findISBN13(book) === this.findISBN13(item)){
                     arr = arr.filter((b) => this.findISBN13(b) !== this.findISBN13(item))
                 }
             })
         })
+        
+        
 
-        let finalResult = resultShelfDuplicate.concat(arr)
+        let finalResult = getAllResultDuplicates.concat(arr)
         return finalResult
     }
+
+
 
     findISBN13 = (book) => {
         let obj;

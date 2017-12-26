@@ -22,7 +22,9 @@ class BooksApp extends React.Component {
     return book.id === id;
   }
 
-//with this code, I need to refresh the page to see the changes :/
+//with this code, I need to refresh the page to see the changes :(
+// I don't understand why I should use this code :s
+// and I don't understand how does setState to know which book's shelf it has to change :|
  /*changeBookShelf = (book, newShelf) => {
         if (book && newShelf){
             BooksAPI.update(book, newShelf).then(bookResult => {
@@ -53,15 +55,18 @@ changeBookShelf = (book, newShelf) => {
                       <h1>MyReads</h1>
                   </div>
                   <div className="list-books-content">
-                      <Shelf shelfTitle='Currently Reading'
-                             books={this.state.books.filter((book)=> book.shelf === 'currentlyReading')}
-                             onChangeShelf={this.changeBookShelf} />
-                      <Shelf shelfTitle='Want to read'
-                             books={this.state.books.filter((book)=> book.shelf === 'wantToRead')}
-                             onChangeShelf={this.changeBookShelf} />
-                      <Shelf shelfTitle='Read'
-                             books={this.state.books.filter((book)=> book.shelf === 'read')}
-                             onChangeShelf={this.changeBookShelf} />
+                      <Shelf 
+                        shelfTitle='Currently Reading'
+                        books={this.state.books.filter((book)=> book.shelf === 'currentlyReading')}
+                        onChangeShelf={this.changeBookShelf} />
+                      <Shelf 
+                        shelfTitle='Want to read'
+                        books={this.state.books.filter((book)=> book.shelf === 'wantToRead')}
+                        onChangeShelf={this.changeBookShelf} />
+                      <Shelf 
+                        shelfTitle='Read'
+                        books={this.state.books.filter((book)=> book.shelf === 'read')}
+                        onChangeShelf={this.changeBookShelf} />
                   </div>
                   <div className="open-search">
                       <Link 
@@ -73,7 +78,8 @@ changeBookShelf = (book, newShelf) => {
           )}/>
           <Route path="/search" render={() => (
             <BookSearch 
-              selectedBooks={this.state.books}/>
+              selectedBooks={this.state.books}
+              onChangeShelf={this.changeBookShelf}/>
           )}/>
       </div>
     )
