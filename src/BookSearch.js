@@ -18,15 +18,10 @@ class BookSearch extends Component{
         onChangeShelf: PropTypes.func.isRequired
     }
 
-    //is this necesary?
-    getInitialState = () => {
-        return this.state.booksResult;
-    }
-
     updateQuery = (query) => {
         this.setState({ query: query.trim() })
         this.setState({booksResult : []})
-        this.getResults(this.state.query)
+        this.getResults(query.trim())
     }
 
     updateBookResult = (result) => {
@@ -50,34 +45,30 @@ class BookSearch extends Component{
         this.setState({ errorLog : ''})
     }
 
+    //I'm trying to make it work with response.ok
     getResults = (value) => {
-        /*if (value){
-            Promise.all([BooksAPI.getAll(), BooksAPI.search(value, 20)]).then((result)=>{
-                let finalResult = this.getFinalResult(result)
-                this.updateBookResult(finalResult)
-                this.updateErrorFalse()
-            }).catch((e) => this.updateErrorTrue(e))
-        } */
         if (value){
             BooksAPI.search(value,20).then((result) => {
                 let finalResult = this.getFinalResult(result)
                 this.updateBookResult(finalResult)
                 this.updateErrorFalse()
-            }).catch((e) => this.updateErrorTrue(e))
-            
+            }).catch((e) => { 
+                this.updateErrorTrue(e)
+                console.log('fetch error:', e.message) })
         }
     }
 
-    //this should be composed by little functions instead, I guess
     getFinalResult = (result) => {
-        let searchResult = result //resultNoShelf
-        let getAllResult = this.props.selectedBooks //resultShelf
+        let searchResult = result 
+        console.log('result', result)
+        let getAllResult = this.props.selectedBooks 
 
         //duplicates with shelf = books from getAll that match the query
         let getAllResultDuplicates = []
-        getAllResult.forEach((book) => {let duplicate = searchResult.find((item)=> (this.findISBN13(item) === this.findISBN13(book)))
-                                        if (duplicate){getAllResultDuplicates.push(book)}})
-        
+        getAllResult.forEach((book) => {
+            let duplicate = searchResult.find((item)=> (this.findISBN13(item) === this.findISBN13(book)))
+            if (duplicate){getAllResultDuplicates.push(book)}})
+
         //search result without duplicates
         let arr = searchResult
         searchResult.forEach((book) => {
@@ -88,18 +79,16 @@ class BookSearch extends Component{
             })
         })
         
-        
-
         let finalResult = getAllResultDuplicates.concat(arr)
         return finalResult
     }
 
-
-
     findISBN13 = (book) => {
         let obj;
+        let objId = 0;
         obj = book.industryIdentifiers.find((indId) => indId.type === 'ISBN_13' )
-        return obj.identifier;
+        obj ? objId = obj.identifier : objId = book.industryIdentifiers[0].identifier
+        return objId
     }
 
     render(){

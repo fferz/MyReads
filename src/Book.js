@@ -2,6 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types';
 
 const Book = (props) => (
+
+
     
             <li key={props.id}>
                 <div className="book">
@@ -20,7 +22,7 @@ const Book = (props) => (
                             </div>
                     </div>
                     <div className="book-title">{props.title}</div>
-                    <div className="book-authors">{props.authors.map((author)=>author)}</div>       
+                    <div className="book-authors">{props.authors && props.authors.map((author)=>author)}</div>       
                     
                 </div>
             </li>
@@ -29,7 +31,7 @@ const Book = (props) => (
 Book.propTypes = {
     id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
-    authors: PropTypes.array.isRequired,
+    authors: PropTypes.array,
     image: PropTypes.string.isRequired,
     shelf: PropTypes.string.isRequired,
     shelfChange: PropTypes.func.isRequired

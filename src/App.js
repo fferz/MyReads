@@ -22,23 +22,13 @@ class BooksApp extends React.Component {
     return book.id === id;
   }
 
-//with this code, I need to refresh the page to see the changes :(
-// I don't understand why I should use this code :s
-// and I don't understand how does setState to know which book's shelf it has to change :|
- /*changeBookShelf = (book, newShelf) => {
-        if (book && newShelf){
-            BooksAPI.update(book, newShelf).then(bookResult => {
-                this.setState({newShelf})
-            })
-        } 
-    }
-*/
-
 changeBookShelf = (book, newShelf) => {
     //here we don't mutate state
     let bookUpdated = book
     bookUpdated.shelf = newShelf
-    this.setState(bookUpdated);
+    let isBook = this.state.books.find((item) => item.id === book.id)
+    //if the book is in state.books => setState(bookUpdated), else add new book to state.books
+    isBook ? this.setState(bookUpdated) : this.setState({books : this.state.books.concat(bookUpdated)})
     this.updateServer(book, newShelf)
   }; 
 
